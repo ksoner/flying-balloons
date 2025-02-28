@@ -4,7 +4,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const balloon = document.getElementById("balloon");
 
     // Polygon Network provider URL (RPC URL)
-    const providerURL = "https://polygon-rpc.com"; 
+    const providerURL = "https://polygon-rpc.com"; // Polygon RPC URL
+    const provider = new ethers.providers.JsonRpcProvider(providerURL);
+
     const contractAddress = "0xFAc83dA7cC9EBd66B35B576a83292c5B51Ab5F50";  // BLN token contract address (replace with the actual contract address)
     
     // Token Contract ABI (only transfer function needed here)
