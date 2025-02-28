@@ -5,20 +5,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const nextNumberElement = document.getElementById("next-number");
     const gameArea = document.getElementById("game-area");
 
-    let numbers = Array.from({ length: 50 }, (_, i) => i + 1);
-    let availableNumbers = numbers.slice(0, 25);
-    let remainingNumbers = numbers.slice(25);
+    let numbers = Array.from({ length: 10 }, (_, i) => i + 1); // 10 balon
+    let availableNumbers = numbers.slice(0, 5);
+    let remainingNumbers = numbers.slice(5);
     let nextNumber = 1;
     let timer = 0;
     let interval;
+
+    let provider, signer, contract;
+    const contractAddress = "0xFAc83dA7cC9EBd66B35B576a83292c5B51Ab5F50";  // Your token contract address
+    const contractABI = [
+        "function rewardPlayer(address player, uint256 amount) public"
+    ];
 
     connectWalletBtn.addEventListener("click", async () => {
         console.log("✅ Connect Wallet butonuna basıldı!");
         if (typeof window.ethereum !== "undefined") {
             try {
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                provider = new ethers.providers.Web3Provider(window.ethereum);
                 await provider.send("eth_requestAccounts", []);
-                const signer = provider.getSigner();
+                signer = provider.getSigner();
                 const playerAddress = await signer.getAddress();
 
                 walletAddressDisplay.innerText = `Connected: ${playerAddress}`;
@@ -77,20 +83,48 @@ document.addEventListener("DOMContentLoaded", () => {
             balloon.remove();
             availableNumbers = availableNumbers.filter(n => n !== number);
             
-            if (availableNumbers.length < 25 && remainingNumbers.length > 0) {
+            if (availableNumbers.length < 5 && remainingNumbers.length > 0) {
                 let newNumber = remainingNumbers.shift();
                 availableNumbers.push(newNumber);
                 createBalloon(newNumber);
             }
 
-            if (nextNumber === 50) {
+            // ✅ Balon patlatıldığında ödül verelim (1 token)
+            rewardPlayer(1);
+
+            if (nextNumber === 10) {
                 clearInterval(interval);
-                alert(`Game Over! Time: ${timer} seconds`);
+                const totalReward = calculateReward();
+                alert(`Game Over! Time: ${timer} seconds. You earned ${totalReward} BLN`);
+
+                // ✅ Oyun bittiğinde büyük ödül verelim (token)
+                rewardPlayer(totalReward);
             } else {
                 nextNumber++;
                 nextNumberElement.textContent = nextNumber;
             }
         }
+    }
+
+    // Web3 ile ödül gönderme fonksiyonu
+    async function rewardPlayer(amount) {
+        try {
+            const tx = await contract.rewardPlayer(await signer.getAddress(), amount);
+            await tx.wait();
+            console.log(`✅ Ödül verildi: ${amount} BLN token`);
+        } catch (error) {
+            console.error("🚨 Ödül verme işlemi başarısız:", error);
+        }
+    }
+
+    // Token hesaplama fonksiyonu
+    function calculateReward() {
+        const reward = Math.floor((1 / timer) * 100);  // (1 / time) * 100
+        if (reward <= 0) {
+            alert("Üzgünüm, çok uzun sürdü ve kazandınız. Daha hızlı tamamlayabilirdiniz!");
+            return 0;  // 0 token
+        }
+        return reward;  // Token miktarı döndürülür
     }
 
     function initGame() {
