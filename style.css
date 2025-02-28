@@ -24,6 +24,7 @@ body {
     border-radius: 5px;
     cursor: pointer;
     transition: 0.3s;
+    z-index: 9999; /* Butonun her zaman üstte kalmasını sağlıyor */
 }
 
 #connect-wallet:hover {
