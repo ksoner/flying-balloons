@@ -1,51 +1,40 @@
-const contractAddress = "0xFAc83dA7cC9EBd66B35B576a83292c5B51Ab5F50"; // Senin BLN Token Kontrat Adresin
-const contractABI = [
-    "function rewardPlayer(address player, uint256 amount) public"
-];
+document.addEventListener("DOMContentLoaded", () => {
+    const connectWalletBtn = document.getElementById("connect-wallet");
+    const walletAddressDisplay = document.getElementById("wallet-address");
 
-let provider, signer, contract, playerAddress;
-let timer = 0;
-let timerInterval;
-let nextNumber = 1;
+    connectWalletBtn.addEventListener("click", async () => {
+        if (typeof window.ethereum !== "undefined") {
+            try {
+                console.log("🔗 MetaMask bağlantısı başlatılıyor...");
 
-// MetaMask ile cüzdan bağlama
-document.getElementById("connect-wallet").addEventListener("click", async () => {
-    if (window.ethereum) {
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        signer = provider.getSigner();
-        playerAddress = await signer.getAddress();
-        contract = new ethers.Contract(contractAddress, contractABI, signer);
-        document.getElementById("wallet-address").innerText = `Connected: ${playerAddress}`;
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                const signer = provider.getSigner();
+                const playerAddress = await signer.getAddress();
 
-        console.log(`✅ Wallet Connected: ${playerAddress}`);
+                walletAddressDisplay.innerText = `Connected: ${playerAddress}`;
+                console.log(`✅ Wallet Connected: ${playerAddress}`);
 
-        // Oyunu başlat
-        startGame();
-    } else {
-        alert("Please install MetaMask!");
-    }
+                // Oyunu başlat
+                startGame();
+            } catch (error) {
+                console.error("🚨 Wallet connection failed:", error);
+                alert("MetaMask connection failed! Please try again.");
+            }
+        } else {
+            alert("Please install MetaMask!");
+            console.error("🚨 MetaMask not found!");
+        }
+    });
 });
 
 // Oyun Başlangıç Fonksiyonu
 function startGame() {
     console.log("🎈 Oyun Başladı!");
     document.getElementById("game-area").innerHTML = ""; // Önceki balonları temizle
-    nextNumber = 1;
-
-    // Timer başlat
-    if (timerInterval) clearInterval(timerInterval);
-    timer = 0;
-    document.getElementById("timer").textContent = timer;
-    timerInterval = setInterval(() => {
-        timer++;
-        document.getElementById("timer").textContent = timer;
-    }, 1000);
 
     let numbers = Array.from({ length: 50 }, (_, i) => i + 1);
     let availableNumbers = numbers.slice(0, 25);
-    let remainingNumbers = numbers.slice(25);
-
     availableNumbers.forEach((number) => createBalloon(number));
 }
 
@@ -55,3 +44,52 @@ function createBalloon(number) {
     balloon.classList.add("balloon");
     balloon.textContent = number;
 
+    const size = Math.random() * 40 + 30;
+    balloon.style.width = `${size}px`;
+    balloon.style.height = `${size}px`;
+
+    const gameArea = document.getElementById("game-area");
+    let xPos, yPos, isOverlapping;
+
+    do {
+        xPos = Math.random() * (gameArea.clientWidth - size);
+        yPos = Math.random() * (gameArea.clientHeight - size);
+        isOverlapping = false;
+
+        const balloons = document.getElementsByClassName("balloon");
+        for (let i = 0; i < balloons.length; i++) {
+            const rect = balloons[i].getBoundingClientRect();
+            if (
+                xPos < rect.right + 50 &&
+                xPos + size > rect.left - 50 &&
+                yPos < rect.bottom + 50 &&
+                yPos + size > rect.top - 50
+            ) {
+                isOverlapping = true;
+                break;
+            }
+        }
+    } while (isOverlapping);
+
+    balloon.style.left = `${xPos}px`;
+    balloon.style.top = `${yPos}px`;
+    balloon.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+
+    gameArea.appendChild(balloon);
+
+    let position = -100;
+    const speed = Math.random() * 2 + 1;
+    const moveInterval = setInterval(() => {
+        if (position > window.innerHeight) {
+            position = -100;
+        } else {
+            position += speed;
+            balloon.style.bottom = `${position}px`;
+        }
+    }, 20);
+
+    balloon.addEventListener("click", () => {
+        clearInterval(moveInterval);
+        popBalloon(balloon, number);
+    });
+}
