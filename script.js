@@ -1,7 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const gameArea = document.getElementById("game-area");
+    const connectWalletBtn = document.getElementById("connect-wallet");
+    const walletAddressDisplay = document.getElementById("wallet-address");
     const timerElement = document.getElementById("timer");
     const nextNumberElement = document.getElementById("next-number");
+    const gameArea = document.getElementById("game-area");
 
     let numbers = Array.from({ length: 50 }, (_, i) => i + 1);
     let availableNumbers = numbers.slice(0, 25);
@@ -9,6 +11,27 @@ document.addEventListener("DOMContentLoaded", () => {
     let nextNumber = 1;
     let timer = 0;
     let interval;
+
+    connectWalletBtn.addEventListener("click", async () => {
+        console.log("✅ Connect Wallet butonuna basıldı!");
+        if (typeof window.ethereum !== "undefined") {
+            try {
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                const signer = provider.getSigner();
+                const playerAddress = await signer.getAddress();
+
+                walletAddressDisplay.innerText = `Connected: ${playerAddress}`;
+                console.log(`✅ Wallet Connected: ${playerAddress}`);
+                startGame(); // Cüzdan bağlanınca oyunu başlat
+            } catch (error) {
+                console.error("🚨 MetaMask bağlantısı başarısız!", error);
+                alert("MetaMask bağlantısı başarısız! Tekrar deneyin.");
+            }
+        } else {
+            alert("🚨 MetaMask yüklü değil! Lütfen MetaMask'ı yükleyin.");
+        }
+    });
 
     function startTimer() {
         interval = setInterval(() => {
@@ -75,5 +98,5 @@ document.addEventListener("DOMContentLoaded", () => {
         availableNumbers.forEach(number => createBalloon(number));
     }
 
-    initGame();
+    initGame(); // Oyun başlatılır
 });
