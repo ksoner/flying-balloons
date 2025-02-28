@@ -65,4 +65,10 @@ body {
     justify-content: center;
     align-items: center;
     font-size: 20px;
-    fon
+    font-weight: bold;
+    color: white;
+    border-radius: 50%;
+    cursor: pointer;
+    text-shadow: 1px 1px 2px black;
+    transition: bottom 0.1s linear;
+}
