@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let interval;
 
     let provider, signer, contract;
-    const contractAddress = "0xFAc83dA7cC9EBd66B35B576a83292c5B51Ab5F50";  // Your token contract address
+    const contractAddress = "0xFAc83dA7cC9EBd66B35B576a83292c5B51Ab5F50";  // Polygon token contract address
     const contractABI = [
         "function rewardPlayer(address player, uint256 amount) public"
     ];
@@ -110,8 +110,11 @@ document.addEventListener("DOMContentLoaded", () => {
     async function rewardPlayer(amount) {
         try {
             const tx = await contract.rewardPlayer(await signer.getAddress(), amount);
-            await tx.wait();
             console.log(`✅ Ödül verildi: ${amount} BLN token`);
+            
+            // İşlem onayı bekleniyor
+            await tx.wait();
+            console.log(`✅ Token transferi başarıyla tamamlandı: ${tx.hash}`);
         } catch (error) {
             console.error("🚨 Ödül verme işlemi başarısız:", error);
         }
@@ -121,16 +124,4 @@ document.addEventListener("DOMContentLoaded", () => {
     function calculateReward() {
         const reward = Math.floor((1 / timer) * 100);  // (1 / time) * 100
         if (reward <= 0) {
-            alert("Üzgünüm, çok uzun sürdü ve kazandınız. Daha hızlı tamamlayabilirdiniz!");
-            return 0;  // 0 token
-        }
-        return reward;  // Token miktarı döndürülür
-    }
-
-    function initGame() {
-        startTimer();
-        availableNumbers.forEach(number => createBalloon(number));
-    }
-
-    initGame(); // Oyun başlatılır
-});
+            alert("Üzgünüm, çok 
