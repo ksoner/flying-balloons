@@ -29,6 +29,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 walletAddressDisplay.innerText = `Connected: ${playerAddress}`;
                 console.log(`✅ Wallet Connected: ${playerAddress}`);
+
+                // Web3 Contract initialization
+                contract = new ethers.Contract(contractAddress, contractABI, signer); // Contract'ı initialize ediyoruz.
+                console.log("✅ Contract bağlantısı başarılı.");
+
                 startGame(); // Cüzdan bağlanınca oyunu başlat
             } catch (error) {
                 console.error("🚨 MetaMask bağlantısı başarısız!", error);
@@ -108,6 +113,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Web3 ile ödül gönderme fonksiyonu
     async function rewardPlayer(amount) {
+        if (!contract) {
+            console.error("🚨 Contract initialization başarısız!");
+            return;
+        }
         try {
             const tx = await contract.rewardPlayer(await signer.getAddress(), amount);
             console.log(`✅ Ödül verildi: ${amount} BLN token`);
@@ -124,4 +133,16 @@ document.addEventListener("DOMContentLoaded", () => {
     function calculateReward() {
         const reward = Math.floor((1 / timer) * 100);  // (1 / time) * 100
         if (reward <= 0) {
-            alert("Üzgünüm, çok 
+            alert("Üzgünüm, çok uzun sürdü ve kazandınız. Daha hızlı tamamlayabilirdiniz!");
+            return 0;  // 0 token
+        }
+        return reward;  // Token miktarı döndürülür
+    }
+
+    function initGame() {
+        startTimer();
+        availableNumbers.forEach(number => createBalloon(number));
+    }
+
+    initGame(); // Oyun başlatılır
+});
