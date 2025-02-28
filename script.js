@@ -1,79 +1,53 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const gameArea = document.getElementById("game-area");
-    const timerElement = document.getElementById("timer");
-    const nextNumberElement = document.getElementById("next-number");
+const contractAddress = "0xFAc83dA7cC9EBd66B35B576a83292c5B51Ab5F50"; // Senin BLN Token Kontrat Adresin
+const contractABI = [
+    "function rewardPlayer(address player, uint256 amount) public"
+];
 
-    let numbers = Array.from({ length: 50 }, (_, i) => i + 1);
-    let availableNumbers = numbers.slice(0, 25);
-    let remainingNumbers = numbers.slice(25);
-    let nextNumber = 1;
-    let timer = 0;
-    let interval;
+let provider, signer, contract, playerAddress;
 
-    function startTimer() {
-        interval = setInterval(() => {
-            timer++;
-            timerElement.textContent = timer;
-        }, 1000);
+// MetaMask ile cüzdan bağlama
+document.getElementById("connect-wallet").addEventListener("click", async () => {
+    if (window.ethereum) {
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+        playerAddress = await signer.getAddress();
+        document.getElementById("wallet-address").innerText = `Connected: ${playerAddress}`;
+        contract = new ethers.Contract(contractAddress, contractABI, signer);
+    } else {
+        alert("Please install MetaMask!");
     }
-
-    function createBalloon(number) {
-        const balloon = document.createElement("div");
-        balloon.classList.add("balloon");
-        balloon.textContent = number;
-        balloon.style.width = `${Math.random() * 50 + 50}px`;
-        balloon.style.height = balloon.style.width;
-        balloon.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
-
-        // Rastgele bir X konumu belirleme
-        const maxWidth = window.innerWidth - 100;
-        balloon.style.left = `${Math.random() * maxWidth}px`;
-
-        // Başlangıç konumu ekranın altında
-        balloon.style.bottom = "-100px";
-
-        // Hareket ettirme
-        let speed = Math.random() * 3 + 2;
-        let position = -100;
-        function moveBalloon() {
-            if (position > window.innerHeight) {
-                position = -100;  // Ekran dışına çıkarsa baştan başlasın
-            }
-            position += speed;
-            balloon.style.bottom = `${position}px`;
-            requestAnimationFrame(moveBalloon);
-        }
-        moveBalloon();
-
-        balloon.addEventListener("click", () => popBalloon(balloon, number));
-        gameArea.appendChild(balloon);
-    }
-
-    function popBalloon(balloon, number) {
-        if (number === nextNumber) {
-            balloon.remove();
-            availableNumbers = availableNumbers.filter(n => n !== number);
-            
-            if (availableNumbers.length <= 25 && remainingNumbers.length > 0) {
-                let newNumber = remainingNumbers.shift();
-                availableNumbers.push(newNumber);
-                createBalloon(newNumber);
-            }
-
-            if (nextNumber === 50) {
-                clearInterval(interval);
-                alert(`Game Over! Time: ${timer} seconds`);
-            } else {
-                nextNumber++;
-                nextNumberElement.textContent = nextNumber;
-            }
-        }
-    }
-
-    function initGame() {
-        startTimer();
-        availableNumbers.forEach(number => createBalloon(number));
-    }
-
-    initGame();
 });
+
+// Balon patlatma işlemi
+async function popBalloon(balloon, number) {
+    if (number === nextNumber) {
+        balloon.remove();
+        availableNumbers = availableNumbers.filter(n => n !== number);
+        
+        if (availableNumbers.length < 25 && remainingNumbers.length > 0) {
+            let newNumber = remainingNumbers.shift();
+            availableNumbers.push(newNumber);
+            createBalloon(newNumber);
+        }
+
+        // BLN Token Transferi
+        if (contract) {
+            try {
+                const tx = await contract.rewardPlayer(playerAddress, ethers.utils.parseUnits("10", 18)); // 10 BLN gönder
+                await tx.wait();
+                console.log(`✅ 10 BLN sent to ${playerAddress}`);
+            } catch (error) {
+                console.error("🚨 BLN transfer failed:", error);
+            }
+        }
+
+        nextNumber++;
+        nextNumberElement.textContent = nextNumber;
+
+        if (nextNumber === 50) {
+            clearInterval(interval);
+            alert(`🎉 Game Over! Time: ${timer} seconds`);
+        }
+    }
+}
