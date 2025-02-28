@@ -3,10 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Balloon Pop Game</title>
+    <title>Balloon Pop Game (Web3)</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
 </head>
 <body>
+    <button id="connect-wallet">Connect Wallet</button>
+    <p id="wallet-address">Not Connected</p>
     <div class="game-container">
         <div class="info">
             <p>Time: <span id="timer">0</span> sec</p>
