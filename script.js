@@ -5,7 +5,8 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("🔍 Script yüklendi, buton dinleniyor...");
 
     connectWalletBtn.addEventListener("click", async () => {
-        console.log("✅ Butona basıldı!");
+        console.log("✅ Connect Wallet butonuna basıldı!");
+        alert("Butona tıkladın!");
 
         if (typeof window.ethereum !== "undefined") {
             try {
@@ -75,4 +76,25 @@ function createBalloon(number) {
         }
     } while (isOverlapping);
 
-    balloon.style.left = `${xPos}px`
+    balloon.style.left = `${xPos}px`;
+    balloon.style.top = `${yPos}px`;
+    balloon.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+
+    gameArea.appendChild(balloon);
+
+    let position = -100;
+    const speed = Math.random() * 2 + 1;
+    const moveInterval = setInterval(() => {
+        if (position > window.innerHeight) {
+            position = -100;
+        } else {
+            position += speed;
+            balloon.style.bottom = `${position}px`;
+        }
+    }, 20);
+
+    balloon.addEventListener("click", () => {
+        clearInterval(moveInterval);
+        popBalloon(balloon, number);
+    });
+}
