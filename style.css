@@ -71,5 +71,5 @@ body {
     border-radius: 50%;
     cursor: pointer;
     text-shadow: 1px 1px 2px black;
-    transition: top 0.1s linear;
+    transition: bottom 0.1s linear;
 }
