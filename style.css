@@ -39,19 +39,6 @@ body {
     color: #333;
 }
 
-/* Oyun Bilgileri */
-.info {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background: rgba(255, 255, 255, 0.8);
-    padding: 10px;
-    border-radius: 5px;
-    font-size: 18px;
-    font-weight: bold;
-    color: black;
-}
-
 /* Oyun Alanı */
 #game-area {
     position: relative;
@@ -65,11 +52,16 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 20px;
+    font-size: 30px;
     font-weight: bold;
     color: white;
     border-radius: 50%;
     cursor: pointer;
+    background-color: hsl(200, 100%, 50%);
+    width: 100px;
+    height: 100px;
     text-shadow: 1px 1px 2px black;
-    transition: bottom 0.1s linear;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
