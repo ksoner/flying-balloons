@@ -38,12 +38,27 @@ body {
     color: #333;
 }
 
+/* Oyun Bilgileri (Sol Üst Köşeye Taşındı) */
+.info {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 18px;
+    font-weight: bold;
+    color: black;
+}
+
+/* Oyun Alanı */
 #game-area {
     position: relative;
     width: 100%;
     height: 100%;
 }
 
+/* Balon Tasarımı */
 .balloon {
     position: absolute;
     display: flex;
@@ -55,6 +70,5 @@ body {
     border-radius: 50%;
     cursor: pointer;
     text-shadow: 1px 1px 2px black;
-    width: 50px;
-    height: 50px;
+    transition: bottom 0.1s linear;
 }
