@@ -49,60 +49,9 @@ function startGame() {
     availableNumbers.forEach((number) => createBalloon(number));
 }
 
-// Balon oluşturma fonksiyonu (Üst üste binmeyi önlüyor)
+// Balon oluşturma fonksiyonu
 function createBalloon(number) {
     const balloon = document.createElement("div");
     balloon.classList.add("balloon");
     balloon.textContent = number;
 
-    let xPos, yPos;
-    let isOverlapping;
-    const gameArea = document.getElementById("game-area");
-    const balloons = document.getElementsByClassName("balloon");
-
-    do {
-        xPos = Math.random() * (gameArea.clientWidth - 50);
-        yPos = Math.random() * (gameArea.clientHeight - 50);
-        isOverlapping = false;
-
-        for (let i = 0; i < balloons.length; i++) {
-            const rect = balloons[i].getBoundingClientRect();
-            if (
-                xPos < rect.right + 20 &&
-                xPos + 50 > rect.left - 20 &&
-                yPos < rect.bottom + 20 &&
-                yPos + 50 > rect.top - 20
-            ) {
-                isOverlapping = true;
-                break;
-            }
-        }
-    } while (isOverlapping);
-
-    balloon.style.left = `${xPos}px`;
-    balloon.style.top = `${yPos}px`;
-    balloon.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
-    balloon.addEventListener("click", () => popBalloon(balloon, number));
-    gameArea.appendChild(balloon);
-}
-
-// Balon patlatma işlemi
-async function popBalloon(balloon, number) {
-    if (number === nextNumber) {
-        balloon.remove();
-
-        // BLN Token Transferi
-        if (contract) {
-            try {
-                const tx = await contract.rewardPlayer(playerAddress, ethers.utils.parseUnits("10", 18)); // 10 BLN gönder
-                await tx.wait();
-                console.log(`✅ 10 BLN sent to ${playerAddress}`);
-            } catch (error) {
-                console.error("🚨 BLN transfer failed:", error);
-            }
-        }
-
-        nextNumber++;
-        document.getElementById("next-number").textContent = nextNumber;
-    }
-}
