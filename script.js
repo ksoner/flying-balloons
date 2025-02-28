@@ -2,20 +2,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const connectWalletBtn = document.getElementById("connect-wallet");
     const walletAddressDisplay = document.getElementById("wallet-address");
     const timerDisplay = document.getElementById("timer");
+    const gameArea = document.getElementById("game-area");
 
-    let gameStarted = false;
     let timer = 0;
+    let gameStarted = false;
     let timerInterval;
-
-    console.log("🔍 Script yüklendi, buton dinleniyor...");
 
     connectWalletBtn.addEventListener("click", async () => {
         console.log("✅ Connect Wallet butonuna basıldı!");
-
         if (typeof window.ethereum !== "undefined") {
             try {
-                console.log("🔗 MetaMask bağlantısı başlatılıyor...");
-
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
                 await provider.send("eth_requestAccounts", []);
                 const signer = provider.getSigner();
@@ -23,34 +19,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 walletAddressDisplay.innerText = `Connected: ${playerAddress}`;
                 console.log(`✅ Wallet Connected: ${playerAddress}`);
-
-                // ✅ Cüzdan bağlanınca oyunu başlat!
-                startGame();
+                startGame(); // Cüzdan bağlandıktan sonra oyunu başlat
             } catch (error) {
-                console.error("🚨 Wallet connection failed:", error);
-                alert("MetaMask connection failed! Please try again.");
+                console.error("🚨 MetaMask bağlantısı başarısız!", error);
+                alert("MetaMask bağlantısı başarısız! Tekrar deneyin.");
             }
         } else {
             alert("🚨 MetaMask yüklü değil! Lütfen MetaMask'ı yükleyin.");
-            console.error("🚨 MetaMask not found!");
         }
     });
 
     function startGame() {
-        console.log("🎈 Oyun Başladı!");
-        document.getElementById("game-area").innerHTML = ""; // Önceki balonları temizle
         gameStarted = true;
         timer = 0;
-        
-        // ✅ Timer başlat
+        timerDisplay.innerText = timer;
+
+        // Timer başlat
         clearInterval(timerInterval);
         timerInterval = setInterval(() => {
             timer++;
             timerDisplay.innerText = timer;
         }, 1000);
 
+        // 1'den 50'ye kadar balonlar oluşturuluyor
         let numbers = Array.from({ length: 50 }, (_, i) => i + 1);
-        let availableNumbers = numbers.slice(0, 25);
+        let availableNumbers = numbers.slice(0, 25);  // İlk 25 balon
         availableNumbers.forEach((number) => createBalloon(number));
     }
 
@@ -59,13 +52,13 @@ document.addEventListener("DOMContentLoaded", () => {
         balloon.classList.add("balloon");
         balloon.textContent = number;
 
+        // Balon boyutları random olacak
         const size = Math.random() * 40 + 30;
         balloon.style.width = `${size}px`;
         balloon.style.height = `${size}px`;
 
-        const gameArea = document.getElementById("game-area");
+        // Ekranda üst üste binmeden balon yerleştirilecek
         let xPos, yPos, isOverlapping;
-
         do {
             xPos = Math.random() * (gameArea.clientWidth - size);
             yPos = Math.random() * (gameArea.clientHeight - size);
@@ -92,12 +85,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         gameArea.appendChild(balloon);
 
-        let position = 0;
+        // Balonların hareket etmesini sağlıyoruz
+        let position = -100;
         const speed = Math.random() * 2 + 1;
-
         const moveInterval = setInterval(() => {
             if (position > window.innerHeight) {
-                position = 0;
+                position = -100; // Ekranın dışına çıktığında başa döner
             } else {
                 position += speed;
                 balloon.style.top = `${position}px`;
@@ -105,19 +98,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 20);
 
         balloon.addEventListener("click", () => {
-            clearInterval(moveInterval);
-            popBalloon(balloon, number);
+            clearInterval(moveInterval);  // Hareketi durdur
+            popBalloon(balloon, number);  // Balonu patlat
         });
     }
 
-    // ✅ popBalloon fonksiyonu eklendi
     function popBalloon(balloon, number) {
         console.log(`🎉 Balon ${number} patlatıldı!`);
-        
-        // Balon patlatıldığında balonu ekrandan kaldır
-        balloon.remove();
-
-        // Burada kullanıcıya ödül verme işlemi yapılabilir
-        // Örnek: Kullanıcıya token verme işlemi yapılabilir.
+        balloon.remove();  // Balonu kaldır
     }
 });
