@@ -24,7 +24,7 @@ body {
     border-radius: 5px;
     cursor: pointer;
     transition: 0.3s;
-    z-index: 9999; /* Butonun her zaman üstte kalmasını sağlıyor */
+    z-index: 9999; /* Buton her zaman üstte */
 }
 
 #connect-wallet:hover {
@@ -71,5 +71,5 @@ body {
     border-radius: 50%;
     cursor: pointer;
     text-shadow: 1px 1px 2px black;
-    transition: bottom 0.1s linear;
+    transition: top 0.1s linear;
 }
